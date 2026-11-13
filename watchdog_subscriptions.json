@@ -1,0 +1,81 @@
+[
+  {
+    "subscription_id": "wd-c6f2ae68e6",
+    "created_at_utc": "2026-11-13T15:19:14Z",
+    "status": "active",
+    "email": "ops@eagles-of-horus.org",
+    "webhook_url": null,
+    "country": "Greece",
+    "bbox": {
+      "lat_min": null,
+      "lat_max": null,
+      "lon_min": null,
+      "lon_max": null
+    },
+    "thresholds": {
+      "frp_threshold_mw": 250.0,
+      "anomaly_severity_threshold": 0.6,
+      "notify_on_anomaly": true
+    },
+    "initial_evaluation": {
+      "alert_triggered": true,
+      "matching_anomalies_preview": [
+        {
+          "country": "Greece",
+          "year": 2023,
+          "month": 8,
+          "lat_bin": 41.0,
+          "lon_bin": 26.0,
+          "harmonized": 1899.9,
+          "frp_mw": 43268.54,
+          "is_anomaly": true,
+          "anomaly_severity": 1.0
+        },
+        {
+          "country": "Greece",
+          "year": 2023,
+          "month": 8,
+          "lat_bin": 40.5,
+          "lon_bin": 25.5,
+          "harmonized": 1493.3,
+          "frp_mw": 39283.61,
+          "is_anomaly": true,
+          "anomaly_severity": 1.0
+        },
+        {
+          "country": "Greece",
+          "year": 2023,
+          "month": 7,
+          "lat_bin": 36.0,
+          "lon_bin": 27.5,
+          "harmonized": 759.3,
+          "frp_mw": 17892.37,
+          "is_anomaly": true,
+          "anomaly_severity": 1.0
+        },
+        {
+          "country": "Greece",
+          "year": 2023,
+          "month": 7,
+          "lat_bin": 38.0,
+          "lon_bin": 23.0,
+          "harmonized": 368.4,
+          "frp_mw": 13290.55,
+          "is_anomaly": true,
+          "anomaly_severity": 1.0
+        },
+        {
+          "country": "Greece",
+          "year": 2024,
+          "month": 9,
+          "lat_bin": 38.0,
+          "lon_bin": 22.0,
+          "harmonized": 339.2,
+          "frp_mw": 8688.25,
+          "is_anomaly": true,
+          "anomaly_severity": 1.0
+        }
+      ]
+    }
+  }
+]
