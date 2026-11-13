@@ -1,222 +1,103 @@
-# EAGLES OF HORUS | Orbital Thermal Harmonization & Anomaly Intelligence
-**Technical Memorandum — 2026 NASA Space Apps Challenge (Giza, Egypt | Zewail City)**  
+# EAGLES OF HORUS | Cross-Sensor Active Fire Harmonization & Anomaly Intelligence
+**Technical Memorandum — 2026 NASA Space Apps Challenge (Giza, Egypt)**  
 **Challenge:** Harmonization of MODIS and VIIRS Hot Spots  
-**Subject:** Earth Science & Geospatial Machine Learning (MIR/TIR Active Fire Harmonization)
+**Domain:** Earth Science, Thermal Remote Sensing (MIR/TIR) & Explainable Geospatial ML
 
 ---
 
-## 1. Executive Summary & Scientific Problem Statement
+## 1. Executive Summary & Scientific Motivation
 
-Earth Observation (EO) satellites operating in the mid-infrared (MIR) and thermal infrared (TIR) spectral ranges have tracked active fire hotspots for over two decades. However, the historical record is split across two generations of instruments that cannot be directly compared without cross-sensor calibration:
-1. **MODIS (Terra & Aqua — Collection 6.1):** Provides an extensive historical series since 2000 at a **1 km** nadir spatial resolution, now approaching the end of its operational life.
-2. **VIIRS (Suomi-NPP, NOAA-20, NOAA-21):** Provides continuity and higher spatial detail at **375 m** resolution, typically detecting ~3.5x to 4.2x more hotspots per unit area due to higher sensitivity to smaller, lower-intensity fires and reduced pixel growth at high scan angles.
+Earth Observation (EO) satellites operating in the mid-infrared (MIR) and thermal infrared (TIR) spectral ranges have tracked active fire hotspots for over two decades. However, emergency responders, fire managers, and scientists face a critical continuity gap across two distinct sensor generations:
+1. **MODIS (Terra & Aqua — Collection 6.1):** Provides the foundational historical series from the early 2000s to the present at a **1 km** nadir spatial resolution, now approaching the end of its operational life.
+2. **VIIRS (Suomi-NPP, NOAA-20 / JPSS-1, NOAA-21):** Provides operational continuity at **375 m** spatial resolution with substantially higher sensitivity to smaller, lower-intensity, and nighttime combustion—detecting roughly **3.5x to 4.5x more hotspots** per fire event than MODIS.
 
-**Eagles of Horus** resolves this discontinuity through a **Physics-Informed Machine Learning Pipeline** and an ultra-low-latency **Cloud WebGIS Command Deck**. By indexing global detections into equal-area **Uber H3 (Resolution 6)** hexagonal cells and calibrating the 2012–2026 sensor overlap window via **LightGBM + SHAP**, our platform synthesizes a unified 27-year **Burning Activity Calendar (2000–2026)** for emergency responders, fire managers, and climate scientists.
+**Eagles of Horus** bridges this sensor disparity through a modular **Quantile Gradient Boosting (`LightGBM`) Harmonization Pipeline**, **Climatology-Normalized `IsolationForest` Anomaly Detection**, **`TreeSHAP` Explainable AI (XAI)**, and an interactive **DuckDB + FastAPI WebGIS Command Deck**. Once harmonized through our pipeline, the sensor of origin no longer skews historical comparisons, allowing users to explore a consistent **Burning Activity Calendar**, evaluate anomalies against multi-year averages, and export standardized CSV analytics.
 
 ---
 
-## 2. System Architecture (Mermaid.js Pipeline)
+## 2. System Architecture
 
 ```mermaid
 flowchart TD
-    subgraph Ingestion ["1. NASA FIRMS Data Ingestion & Schema Normalization"]
-        A1["MODIS C6.1 Archive & NRT<br/>(1km, Numeric Confidence 0-100)"]
-        A2["VIIRS S-NPP / NOAA-20 / NOAA-21<br/>(375m, Nominal/High Confidence)"]
-        B["PyArrow Schema Normalizer<br/>(UTC ISO-8601, Brightness K, Scan Geometry)"]
-        A1 & A2 --> B
+    subgraph Ingestion ["1. Raw FIRMS Ingestion & Quality Gating (src/clean_pipeline.py)"]
+        A1["MODIS C6.1 CSVs (25 Files)<br/>Terra & Aqua | 1km | 3,936,693 Rows"]
+        A2["VIIRS JPSS-1 / N20 CSVs (19 Files)<br/>NOAA-20 | 375m | 14,930,956 Rows"]
+        B["Schema Standardization & Quality Gate<br/>MODIS conf >= 30 | VIIRS conf != 'l'<br/>17,196,640 Retained Detections (91.14%)"]
+        C["0.5° × 0.5° Spatiotemporal Grid Aggregation<br/>293,719 Paired Cells (cleaned_paired_grid.parquet)"]
+        A1 & A2 --> B --> C
     end
 
-    subgraph SpatialML ["2. Physics-Informed H3 ML Pipeline"]
-        C["Uber H3 Spatial Indexer (Res 6)<br/>Equal-Area Hexagonal Aggregation (~36.1 km²)"]
-        D["LightGBM Cross-Sensor Harmonizer<br/>(Trained on 2012–2026 Overlap Window)"]
-        E["SHAP TreeExplainer<br/>(Real-Time Physical Driver Attribution)"]
-        F["Hybrid Anomaly Engine<br/>(Isolation Forest + 25-Yr Monthly IQR Z-Score)"]
-        B --> C --> D
-        D --> E & F
+    subgraph ML ["2. Quantile Harmonizer, Anomaly & XAI Engine (src/train_models.py)"]
+        D["LightGBM Quantile Regressors (α = 0.10, 0.50, 0.90)<br/>5-Fold TimeSeriesSplit on 188,293 Overlap Cells (2021–2025)<br/>Mean Out-of-Fold R² = 0.8833 | Median Pinball Loss = 12.14"]
+        E["Historical Pre-VIIRS Reconstruction (2005, 2010, 2012)<br/>Strict Monotonic 80% CI: harmonized_low <= harmonized <= harmonized_high"]
+        F["Climatology-Normalized Isolation Forest<br/>Per-Country/Month Z-Scores & Anomaly Severity [0, 1]"]
+        G["SHAP TreeExplainer<br/>Normalized Physical Feature Attributions (%)"]
+        C --> D --> E & F & G
     end
 
-    subgraph CloudBackend ["3. Ultra-Fast Analytical Backend (<50ms)"]
-        G[("Partitioned GeoParquet Lake<br/>(Snappy Compressed by Year)")]
-        H["DuckDB In-Memory Analytical Engine<br/>(FastAPI Async Lifespan)"]
-        I["24/7 Orbital Watchdog<br/>(APScheduler + FIRMS NRT API + Telegram Bot)"]
-        C --> G --> H
-        F --> H
-        F --> I
+    subgraph Backend ["3. Analytical Lake & FastAPI Server (src/api_server.py)"]
+        H[("global_5regions_harmonized.parquet<br/>293,719 Rows × 32 Columns + telemetry_summary.json")]
+        I["In-Memory DuckDB SQL Engine + FastAPI<br/>GET /health | POST /api/analyze-aoi | GET/POST /api/export-csv"]
+        J["24/7 Orbital Watchdog<br/>POST /api/watchdog/subscribe + Real-Time Megafire Alerting"]
+        E & F & G --> H --> I & J
     end
 
-    subgraph Frontend ["4. Orbital Command Deck (WebGIS)"]
-        J["3D Interactive Globe & AOI Selector<br/>(Polygon Draw + Lat/Lon Input)"]
-        K["27-Year Burning Activity Calendar<br/>(Colorblind-Safe Viridis/Inferno Ramps)"]
-        L["Researcher Export Engine<br/>(Harmonized CSV & GeoJSON Streams)"]
-        H --> J & K & L
+    subgraph WebGIS ["4. Interactive WebGIS Application"]
+        K["Dual AOI Selection Map<br/>Interactive Polygon/BBox Draw + Manual Lat/Lon & Date Inputs"]
+        L["Harmonized Burning Activity Calendar<br/>Accessible Color Ramps (Inferno, Viridis, Cividis, Magma)"]
+        M["Role-Tailored Analytics & One-Click CSV / Chart Export<br/>Responders | Firefighters | Scientists | Land Managers"]
+        I & J --> K & L & M
     end
 ```
 
 ---
 
-## 3. Mathematical Formulation & Physics-Informed ML
+## 3. Data Engineering & Audit Summary (`src/clean_pipeline.py`)
 
-### 3.1 Equal-Area Hexagonal Discretization (Uber H3 Res 6)
-Standard latitude-longitude grids suffer from severe areal distortion toward higher latitudes. Every raw fire detection $p_i = (\phi_i, \lambda_i, t_i)$ is projected onto a discrete global grid system (DGGS) using **Uber H3 at Resolution 6** (mean cell area $\approx 36.13 \text{ km}^2$), aggregating monthly state vectors per hexagon $h$ and time step $t = (y, m)$.
+Our ingestion pipeline audited **44 raw NASA FIRMS CSV datasets** totaling **18,867,649 raw detections**, executing quality gating, coordinate bounding-box verification, and spatiotemporal aggregation in **9.95 seconds** (audit metrics logged in `cleaning_audit.json`).
 
-### 3.2 Cross-Sensor Spatial Density Harmonization
-During the 2000–2011 pre-VIIRS era, the counterfactual VIIRS-equivalent hotspot density $\hat{D}_{\text{VIIRS}}(h, t)$ is estimated using a monotonically constrained Gradient Boosted Decision Tree (`LightGBM Regressor`) trained on the 2012–2026 co-observation period:
+### 3.1 Sensor Schema Standardization & Quality Gates
 
-$$\hat{D}_{\text{VIIRS}}(h, t) = f_{\text{LightGBM}}\left(D_{\text{MODIS}}(h, t), \overline{\text{FRP}}_{h,t}, \overline{T}_{b(h,t)}, \overline{\theta}_{\text{scan}(h,t)}, m, \phi_h\right)$$
+| Sensor | Files | Standardized Columns (15) | Date Format | Satellite / Instrument | Confidence Gate | Raw Rows | Cleaned Rows |
+| :--- | :---: | :--- | :---: | :---: | :--- | :---: | :---: |
+| **MODIS** | 25 | `latitude, longitude, brightness, scan, track, acq_date, acq_time, satellite, instrument, confidence, version, bright_t31, frp, daynight, type` | `YYYY-MM-DD` | `Terra`, `Aqua` / `MODIS` | Integer `0–100` (`confidence >= 30`) | 3,936,693 | 3,506,632 |
+| **VIIRS** | 19 | `latitude, longitude, bright_ti4, scan, track, acq_date, acq_time, satellite, instrument, confidence, version, bright_ti5, frp, daynight, type` | `YYYY-MM-DD` | `N20` (JPSS-1) / `VIIRS` | Categorical `'l', 'n', 'h'` (`confidence != 'l'`) | 14,930,956 | 13,690,008 |
+| **Total** | **44** | Aliased `bright_ti4` $\rightarrow$ `brightness` | `YYYY-MM-DD` | **MODIS & VIIRS** | **91.14% Retention** | **18,867,649** | **17,196,640** |
 
-Where:
-* $D_{\text{MODIS}}(h, t)$: Raw MODIS hotspot count within H3 cell $h$ during month $t$.
-* $\overline{\text{FRP}}_{h,t}$: Mean Fire Radiative Power ($\text{MW}$), capturing sub-pixel combustion intensity.
-* $\overline{T}_{b(h,t)}$: Mean MIR brightness temperature ($\text{Kelvin}$, Channel 21/22 for MODIS `brightness`; Channel I4 for VIIRS `bright_ti4`).
-* $\overline{\theta}_{\text{scan}(h,t)}$: Mean off-nadir scan pixel dimension ($\text{km}$), compensating for the bow-tie geometric distortion at swath edges.
-* $m \in \{1..12\}$: Seasonal phenology month index.
-
-Monotonic constraints ($\frac{\partial \hat{D}}{\partial D_{\text{MODIS}}} \ge 0$, $\frac{\partial \hat{D}}{\partial \overline{\text{FRP}}} \ge 0$) preserve radiative transfer consistency. Local feature attributions are extracted via **SHAP (SHapley Additive exPlanations)** so fire managers can inspect why a specific cell was scaled.
-
-### 3.3 Multivariate Hybrid Anomaly Scoring
-To identify critical fire weather surges and unusual burning conditions relative to multi-year baselines, each cell-month is evaluated against its 25-year historical distribution using a hybrid score $S_{\text{anomaly}}(h, t) \in [0, 1]$:
-
-$$S_{\text{anomaly}}(h, t) = \alpha \cdot \mathcal{N}\left(\text{IsoForest}(\mathbf{X}_{h,t})\right) + (1 - \alpha) \cdot \sigma\left(\frac{\hat{D}(h, t) - \text{Median}_{25\text{yr}}(h, m)}{\text{IQR}_{25\text{yr}}(h, m) + \epsilon}\right)$$
-
-Where:
-* $\mathbf{X}_{h,t} = [\hat{D}, \sum \text{FRP}, \overline{T}_b]$ represents the multivariate thermal intensity vector.
-* $\text{Median}_{25\text{yr}}(h, m)$ and $\text{IQR}_{25\text{yr}}(h, m)$ denote the historical median and interquartile range for hexagon $h$ in calendar month $m$.
-* $\sigma(\cdot)$ is a logistic normalization function, $\alpha = 0.45$ weights the unsupervised Isolation Forest score, and $\epsilon = 10^{-5}$ prevents zero-division in arid cells.
-* **Risk Tiers:** `Normal` ($S < 0.50$), `Elevated` ($0.50 \le S < 0.80$), and `Critical Surge` ($S \ge 0.80$, corresponding to approximately the 95th percentile extreme value threshold).
+### 3.2 Target Regions, Bounding Boxes & Benchmark Years
+Detections are filtered to five major fire-regime benchmark regions and aggregated into **`0.5° × 0.5°` grid cells** (`lat_bin`, `lon_bin`) by `(country, year, month)`, yielding **293,719 paired cells**:
+* **USA** (`lat: 24.5 to 49.5, lon: -125.0 to -66.5` — CONUS) & **Canada** (`lat: 41.7 to 83.1, lon: -141.0 to -52.6`): Benchmark years `[2005, 2010, 2012, 2021, 2022, 2023, 2024, 2025]`.
+* **Brazil** (`lat: -33.7 to 5.3, lon: -74.0 to -34.8`), **Greece** (`lat: 34.8 to 41.8, lon: 19.3 to 29.6`), & **Australia** (`lat: -43.6 to -10.7, lon: 113.3 to 153.6`): Benchmark years `[2023, 2024, 2025]`.
+* **Cell Feature Vector:** `hotspot_count`, `frp_sum` (MW), `frp_p90` (90th percentile radiative power), `night_fire_ratio` (fraction of detections where `daynight == 'N'`), `brightness_mean` (Kelvin), and cyclical seasonality encodings (`sin_month`, `cos_month`).
 
 ---
 
-## 4. Sensor Schema Normalization Protocol
+## 4. Mathematical Formulation (`src/train_models.py`)
 
-Raw NASA FIRMS archives exhibit schema divergences between MODIS and VIIRS that break naive ingestion pipelines. Our `prepare_firms_data.py` engine enforces strict pre-harmonization rules:
+### 4.1 LightGBM Quantile Harmonization (80% Prediction Intervals)
+Because `viirs-jpss1` (NOAA-20) launched in late 2017, the `2021–2025` window provides **188,293 overlapping MODIS + VIIRS grid-cell records** across our five regions, while `2005`, `2010`, and `2012` in the USA and Canada represent pre-NOAA-20 MODIS observations.
 
-| Attribute | MODIS Collection 6.1 | VIIRS 375m (S-NPP / NOAA-20 / 21) | Harmonized Parquet Schema |
-| :--- | :--- | :--- | :--- |
-| **Nadir Resolution** | 1000 m | 375 m | Indexed to H3 Res 6 |
-| **MIR Temperature** | `brightness` (Kelvin) | `bright_ti4` (Kelvin) | `brightness_k` (`float32`) |
-| **Confidence Type** | Integer (`0` to `100`) | String (`l`, `n`, `h`) | Filtered: `>= 50` or `n`/`h` |
-| **Timestamp Format** | `acq_date` + `acq_time` | `acq_date` + `acq_time` | `timestamp_utc` (ISO-8601) |
+To map MODIS physical features $\mathbf{x}_{c,t}$ to VIIRS-equivalent sensitivity while quantifying predictive uncertainty, we train three **LightGBM Quantile Regressors** at quantiles $\alpha \in \{0.10, 0.50, 0.90\}$ minimizing the pinball loss $\mathcal{L}_{\alpha}$:
 
----
+$$\mathcal{L}_{\alpha}(y, \hat{y}) = \max\left(\alpha (y - \hat{y}), (\alpha - 1)(y - \hat{y})\right)$$
 
-## 5. Validation Benchmark (2012–2026 Co-Observation Window)
+$$\hat{D}_{\alpha}(c, t) = f_{\text{LightGBM}}^{(\alpha)}\left(\text{raw\_modis}, \text{frp\_sum}, \text{frp\_p90}, \text{night\_fire\_ratio}, \text{brightness\_mean}, \sin(m), \cos(m), \phi_{\text{bin}}, \lambda_{\text{bin}}\right)$$
 
-Evaluated across four holdout test regions (Mediterranean Basin/Greece, California, Amazon Basin, and Southeastern Australia) during the 2012–2026 overlap period, the LightGBM harmonizer substantially reduces cross-sensor count disparity:
+Monotonic sorting enforces $\hat{D}_{0.10}(c, t) \le \hat{D}_{0.50}(c, t) \le \hat{D}_{0.90}(c, t)$, producing `harmonized_low`, `harmonized`, and `harmonized_high` across both historical (`2005, 2010, 2012`) and overlapping (`2021–2025`) benchmark years. Across 5-fold `TimeSeriesSplit` validation, the model achieves a mean out-of-fold **$R^2 = 0.8833$** (`0.8454–0.9018` across folds) and a median pinball loss of **`12.14`**.
 
-| Metric | Uncalibrated Raw Data | Linear Scaling Baseline | LightGBM + H3 Harmonizer |
-| :--- | :--- | :--- | :--- |
-| **VIIRS / MODIS Ratio** | 4.12x | 1.38x | 1.03x |
-| **R² Score (Holdout)** | 0.241 | 0.715 | 0.942 |
-| **Monthly Cell RMSE** | 48.62 | 14.20 | 4.85 |
-| **Query Latency (27-Yr)** | ~4,800 ms (Pandas CSV) | ~1,150 ms (SQLite) | ~18.4 ms (DuckDB Parquet) |
+### 4.2 Climatology-Normalized Isolation Forest & TreeSHAP XAI
+To detect abnormal burning activity relative to multi-year seasonal baselines, we compute per-country, per-calendar-month climatological $z$-scores:
 
-*Note: Validation metrics reflect spatial-temporal holdout testing on H3 Resolution 6 monthly aggregates; query latency typically ranges between 12 ms and 45 ms depending on bounding-box size.*
+$$\mathbf{z}_{c,y,m} = \left[ z(\hat{D}_{0.50}), \; z(\text{FRP}_{\text{sum}}), \; z(\text{FRP}_{p90}), \; \Delta\text{NightRatio}_{c,y,m} \right]$$
+
+An unsupervised `IsolationForest` trained on $\mathbf{z}_{c,y,m}$ outputs a binary flag `is_anomaly` and a normalized severity score $\text{anomaly\_severity} \in [0, 1]$. Simultaneously, `shap.TreeExplainer` extracts normalized percentage attributions explaining how physical fire characteristics drive the harmonization factor in each region and month.
 
 ---
 
-## 6. REST API Specification & JSON Contract
+## 5. Multi-Region Validation & Telemetry Benchmark
 
-The FastAPI backend (`backend/app/main.py`) loads `models/harmonizer.pkl` and `models/anomaly.pkl` during startup lifespan events and queries partitioned GeoParquet files via `DuckDB`.
+The table below summarizes the harmonized output stored in `data/global_5regions_harmonized.parquet` and `data/telemetry_summary.json`:
 
-### `POST /api/analyze-aoi`
-Accepts either a GeoJSON polygon or a bounding box (`[min_lon, min_lat, max_lon, max_lat]`) along with manual coordinate inputs, returning the 27-year Burning Activity Calendar matrix, sensor comparison statistics, and SHAP attributions.
-
-**Request Payload:**
-```json
-{
-  "aoi_bbox": [23.50, 37.80, 24.10, 38.20],
-  "start_year": 2000,
-  "end_year": 2026,
-  "color_ramp": "inferno_accessible"
-}
-```
-
-**Response Payload:**
-```json
-{
-  "metadata": {
-    "aoi_bbox": [23.5, 37.8, 24.1, 38.2],
-    "h3_resolution": 6,
-    "years_covered": [2000, 2026],
-    "query_time_ms": 18.4,
-    "color_ramp": "inferno_accessible"
-  },
-  "harmonization_metrics": {
-    "pre_calibration_ratio": 4.12,
-    "post_calibration_ratio": 1.03,
-    "r2_score": 0.942,
-    "rmse": 4.85
-  },
-  "calendar_matrix": [
-    {
-      "year": 2026,
-      "month": 8,
-      "raw_modis_count": 142,
-      "raw_viirs_count": 585,
-      "harmonized_count": 571.4,
-      "historical_25yr_median": 310.0,
-      "iqr_z_score": 2.84,
-      "anomaly_score": 0.89,
-      "risk_tier": "Critical Surge"
-    }
-  ],
-  "shap_explanations": {
-    "mean_scan_angle_impact_pct": 64.2,
-    "sum_frp_impact_pct": 27.5,
-    "brightness_temp_impact_pct": 8.3
-  }
-}
-```
-
-### `POST /api/export`
-Streams the harmonized time-series dataset for the selected Area of Interest and date range as a clean **CSV** or **GeoJSON** file with embedded metadata headers, ready for immediate inspection in QGIS or statistical software.
-
-### `POST /api/watchdog/subscribe`
-Registers a user's Area of Interest and Telegram `chat_id` (or email). Triggers an immediate live connection verification alert via the **Telegram Bot API** and schedules a 15-minute `APScheduler` background job polling the **NASA FIRMS NRT API** for real-time thermal surges ($S_{\text{anomaly}} \ge 0.80$).
-
----
-
-## 7. Repository Structure & Quickstart
-
-```text
-eagles-of-horus/
-├── backend/
-│   ├── app/
-│   │   ├── main.py                # FastAPI endpoints, DuckDB engine & lifespan loader
-│   │   ├── watchdog.py            # 24/7 APScheduler NASA FIRMS NRT + Telegram Bot alert engine
-│   │   └── ml/
-│   │       ├── spatial_indexer.py # Uber H3 (Res 6) aggregation pipeline
-│   │       ├── train_harmonizer.py# LightGBM cross-sensor calibration + SHAP export
-│   │       └── anomaly_engine.py  # Isolation Forest + 25-year monthly IQR Z-score
-│   ├── data/
-│   │   └── firms_parquet/         # Year-partitioned snappy GeoParquet lake (2000–2026)
-│   ├── models/
-│   │   ├── harmonizer.pkl         # Serialized LightGBM model & SHAP TreeExplainer
-│   │   └── anomaly.pkl            # Serialized Isolation Forest & historical baselines
-│   ├── prepare_firms_data.py      # Raw NASA FIRMS CSV ingestion & normalization script
-│   ├── Dockerfile                 # Production container configuration
-│   └── requirements.txt
-├── frontend/                      # 3D Earth Hero + Orbital WebGIS Command Deck
-├── render.yaml                    # One-click cloud deployment blueprint
-└── README.md
-```
-
-### Local Execution
-```bash
-# 1. Install dependencies
-cd backend
-pip install -r requirements.txt
-
-# 2. Ingest and normalize raw NASA FIRMS CSV archives into partitioned GeoParquet
-python prepare_firms_data.py
-
-# 3. Train and export the ML Harmonizer and Anomaly models
-python -m app.ml.train_harmonizer
-python -m app.ml.anomaly_engine
-
-# 4. Launch the ultra-fast FastAPI + DuckDB server
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
----
-*Developed by **Eagles of Horus** for the 2026 NASA Space Apps Challenge — Giza, Egypt.*
+| Country | Benchmark Years | Cleaned MODIS | Cleaned VIIRS | Harmonized Count `[80% CI: Low – High]` | Total FRP (MW) | Anomaly Months | Top 3 SHAP Drivers (%) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |
+| **USA** |
