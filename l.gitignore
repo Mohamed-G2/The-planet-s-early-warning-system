@@ -1,0 +1,19 @@
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Data directories (keep data local or use Git LFS if necessary)
+data/
+raw_data/
+
+# Model binaries
+models/
+*.pkl
+*.h5
+*.pt
+*.onnx
+
+# Python cache
+__pycache__/
+*.py[cod]
