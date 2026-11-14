@@ -891,7 +891,7 @@ export default function OrbitalHero3D({
   return (
     <section
       id="orbital-globe"
-      className="relative w-full h-[100svh] min-h-[680px] bg-[#020408] overflow-hidden select-none"
+      className="relative w-full h-[100svh] min-h-[540px] sm:min-h-[640px] lg:min-h-[720px] bg-[#020408] overflow-hidden select-none"
       style={{ touchAction: 'pan-y' }}
     >
       {/* Ambient deep-space blooms */}
@@ -923,7 +923,7 @@ export default function OrbitalHero3D({
 
       {/* Hero typography */}
       <div className="pointer-events-none absolute inset-0 z-20 flex items-center">
-        <div className="w-full max-w-[1480px] mx-auto px-6 lg:px-12 pb-24">
+        <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-12 pb-32 sm:pb-24 pt-16 sm:pt-0">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -939,7 +939,7 @@ export default function OrbitalHero3D({
             </span>
           </motion.div>
 
-          <h1 className="mt-5 sm:mt-6 font-sans font-extrabold text-white tracking-[-0.04em] leading-[0.94] text-[30px] sm:text-[64px] lg:text-[84px] xl:text-[96px]">
+          <h1 className="mt-4 sm:mt-6 font-sans font-extrabold text-white tracking-[-0.035em] leading-tight sm:leading-[0.94] text-3xl sm:text-5xl lg:text-7xl xl:text-[96px]">
             {titleWords.map((w, i) => (
               <span key={w.text} className={`block overflow-hidden ${i === 2 ? 'pb-2' : ''}`}>
                 <motion.span

@@ -231,6 +231,15 @@
   animation: thermal-pulse 2.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
+/* Hide horizontal scrollbars for compact mobile pills */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @media print {
   @page {
     size: A4 portrait;

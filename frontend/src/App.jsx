@@ -280,7 +280,7 @@ export default function App() {
   const regionAccent = getRegionMeta(selectedCountry, activeCountryData).accent || '#38BDF8';
 
   return (
-    <div className="min-h-screen bg-[#020408] text-slate-100 font-sans relative selection:bg-sky-500/30 selection:text-sky-100">
+    <div className="min-h-screen overflow-x-hidden max-w-full bg-[#020408] text-slate-100 font-sans relative selection:bg-sky-500/30 selection:text-sky-100">
       {/* Subtle film grain & ambient deep-space blooms */}
       <div aria-hidden className="noise-overlay" />
       <div
@@ -303,7 +303,7 @@ export default function App() {
 
       <main
         id="command-deck"
-        className="relative z-20 max-w-[1480px] mx-auto px-5 sm:px-8 lg:px-12 py-16 space-y-8"
+        className="relative z-20 max-w-[1480px] mx-auto px-3 sm:px-8 lg:px-12 py-10 sm:py-16 space-y-6 sm:space-y-8"
       >
         {/* Minimal Executive Command Header */}
         <Reveal y={18} className="flex flex-wrap items-center justify-between gap-4 pb-2">
@@ -322,7 +322,7 @@ export default function App() {
             <span className="eyebrow !text-sky-300">Command Deck</span>
           </div>
 
-          <div className="glass-pill rounded-full px-4 py-1.5 flex items-center gap-3 font-mono text-[11px] tabular-nums text-slate-400 whitespace-nowrap">
+          <div className="glass-pill rounded-2xl sm:rounded-full px-3 sm:px-4 py-1.5 flex flex-wrap items-center gap-2 sm:gap-3 font-mono text-[10.5px] sm:text-[11px] tabular-nums text-slate-400 max-w-full">
             <span className="flex items-center gap-1.5 text-emerald-300">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
               {backendStatus.online ? 'DuckDB Live' : 'Embedded Telemetry'}

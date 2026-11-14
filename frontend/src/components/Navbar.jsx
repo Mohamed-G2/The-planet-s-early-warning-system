@@ -74,18 +74,18 @@ export default function Navbar({ onOpenDrawer }) {
       initial={{ opacity: 0, y: -24, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.9, delay: 0.15, ease: EASE_OUT }}
-      className="no-print fixed top-5 left-1/2 z-40 w-[calc(100%-2rem)] max-w-[820px] select-none"
+      className="no-print fixed top-3 sm:top-5 left-1/2 z-40 w-[calc(100%-1rem)] max-w-[95vw] sm:max-w-[820px] select-none"
       style={{ x: '-50%' }}
     >
-      <div className="glass-pill rounded-full px-4 sm:px-6 py-2.5 flex items-center justify-between gap-6">
+      <div className="glass-pill rounded-full px-3 py-2 sm:px-6 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-6">
         {/* Left — insignia + live pulse */}
         <a
           href="#orbital-globe"
           onClick={(e) => scrollTo(e, 'orbital-globe')}
-          className="flex items-center gap-2.5 shrink-0 group"
+          className="flex items-center gap-2 sm:gap-2.5 shrink-0 group min-h-[36px]"
         >
           <HorusInsignia />
-          <span className="font-sans text-[12.5px] font-bold tracking-[0.24em] text-white whitespace-nowrap group-hover:text-amber-100 transition-colors">
+          <span className="font-sans text-[11px] sm:text-[12.5px] font-bold tracking-[0.18em] sm:tracking-[0.24em] text-white whitespace-nowrap group-hover:text-amber-100 transition-colors">
             EAGLES OF HORUS
           </span>
           <span className="relative hidden sm:flex h-1.5 w-1.5 ml-1">
@@ -139,12 +139,34 @@ export default function Navbar({ onOpenDrawer }) {
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           onClick={() => onOpenDrawer && onOpenDrawer('sitrep')}
-          className="relative shrink-0 inline-flex items-center gap-2 pl-3.5 pr-4 py-1.5 rounded-full text-[12px] font-semibold whitespace-nowrap text-[#1a0f02] bg-gradient-to-b from-amber-200 to-amber-400 shadow-[0_0_24px_-4px_rgba(251,191,36,0.65),inset_0_1px_0_0_rgba(255,255,255,0.6)]"
+          className="relative shrink-0 min-h-[36px] inline-flex items-center gap-1.5 sm:gap-2 pl-3 pr-3.5 sm:pl-3.5 sm:pr-4 py-1.5 rounded-full text-[11.5px] sm:text-[12px] font-semibold whitespace-nowrap text-[#1a0f02] bg-gradient-to-b from-amber-200 to-amber-400 shadow-[0_0_24px_-4px_rgba(251,191,36,0.65),inset_0_1px_0_0_rgba(255,255,255,0.6)]"
         >
           <FileDown className="w-3.5 h-3.5" strokeWidth={2.2} />
           <span>SitRep &amp; CSV</span>
         </motion.button>
       </div>
+
+      {/* Mobile scrollable quick-jump strip */}
+      <nav
+        aria-label="Mobile sections"
+        className="flex md:hidden items-center gap-1 overflow-x-auto no-scrollbar mt-1.5 px-2 py-1 glass-pill rounded-full"
+      >
+        {NAV_ITEMS.map((item) => {
+          const isActive = activeId === item.id;
+          return (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              onClick={(e) => scrollTo(e, item.id)}
+              className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${
+                isActive ? 'bg-white/[0.08] text-white' : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              {item.label}
+            </a>
+          );
+        })}
+      </nav>
     </motion.header>
   );
 }

@@ -531,7 +531,7 @@ export default function TacticalMap2D({
       <Reveal y={26} className="xl:col-span-8 flex">
         <SpotlightCard glow="#38BDF8" className="w-full overflow-hidden flex flex-col">
           {/* Minimalist Header */}
-          <div className="px-6 py-4 border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-3">
+          <div className="px-4 sm:px-6 py-4 border-b border-white/[0.06] flex flex-wrap items-center justify-between gap-2 sm:gap-3">
             <CardHeader
               icon={Layers}
               iconColor="text-sky-300"
@@ -575,7 +575,7 @@ export default function TacticalMap2D({
           </div>
 
           {/* Map Viewport + Curtain Slider */}
-          <div ref={viewportRef} className="relative w-full h-[500px] xl:flex-1 min-h-[480px] select-none overflow-hidden">
+          <div ref={viewportRef} className="relative w-full h-[380px] sm:h-[520px] xl:flex-1 sm:min-h-[480px] select-none overflow-hidden">
             <div ref={mapContainerRef} className="w-full h-full z-10" />
 
             {/* Top Curtain Mode Badges */}
@@ -609,7 +609,7 @@ export default function TacticalMap2D({
                     setIsDraggingSplit(true);
                   }}
                   style={{ left: `${splitPct}%` }}
-                  className="absolute inset-y-0 z-[460] w-8 -ml-4 flex items-center justify-center cursor-ew-resize group focus:outline-none"
+                  className="touch-none absolute inset-y-0 z-[460] w-10 -ml-5 flex items-center justify-center cursor-ew-resize group focus:outline-none"
                 >
                   <div className="h-full w-px bg-gradient-to-b from-sky-400/20 via-white/85 to-amber-400/20 shadow-[0_0_16px_rgba(255,255,255,0.85)]" />
                   <div className="absolute glass-pill w-8 h-11 rounded-full flex items-center justify-center text-white group-hover:scale-105 transition-transform shadow-[0_0_24px_rgba(56,189,248,0.45)]">

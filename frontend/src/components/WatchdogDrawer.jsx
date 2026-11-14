@@ -221,7 +221,7 @@ export default function WatchdogDrawer({
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={SPRING}
-              className="fixed inset-y-0 right-0 z-[9999] w-full max-w-xl h-full bg-[#060912]/95 backdrop-blur-2xl border-l border-white/[0.09] shadow-[0_0_90px_rgba(0,0,0,0.9)] flex flex-col justify-between overflow-y-auto"
+              className="fixed inset-y-0 right-0 z-[9999] w-full sm:max-w-lg h-full bg-[#060912]/95 backdrop-blur-2xl border-l border-white/[0.09] shadow-[0_0_90px_rgba(0,0,0,0.9)] flex flex-col justify-between overflow-y-auto"
             >
               <div>
                 {/* Print-Only Formal Mission Header */}
