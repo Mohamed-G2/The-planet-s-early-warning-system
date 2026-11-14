@@ -891,7 +891,8 @@ export default function OrbitalHero3D({
   return (
     <section
       id="orbital-globe"
-      className="relative w-full h-[100svh] min-h-[720px] bg-[#020408] overflow-hidden select-none"
+      className="relative w-full h-[100svh] min-h-[680px] bg-[#020408] overflow-hidden select-none"
+      style={{ touchAction: 'pan-y' }}
     >
       {/* Ambient deep-space blooms */}
       <div
@@ -938,7 +939,7 @@ export default function OrbitalHero3D({
             </span>
           </motion.div>
 
-          <h1 className="mt-6 font-sans font-extrabold text-white tracking-[-0.045em] leading-[0.9] text-[44px] sm:text-[68px] lg:text-[88px] xl:text-[100px]">
+          <h1 className="mt-5 sm:mt-6 font-sans font-extrabold text-white tracking-[-0.04em] leading-[0.94] text-[30px] sm:text-[64px] lg:text-[84px] xl:text-[96px]">
             {titleWords.map((w, i) => (
               <span key={w.text} className={`block overflow-hidden ${i === 2 ? 'pb-2' : ''}`}>
                 <motion.span
@@ -973,7 +974,7 @@ export default function OrbitalHero3D({
             transition={{ duration: 0.8, delay: 1.15, ease: EASE_OUT }}
             className="pointer-events-auto mt-9 flex flex-wrap items-center gap-2"
           >
-            <div className="inline-flex items-center gap-0.5 rounded-full p-1 bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl">
+            <div className="inline-flex flex-wrap sm:flex-nowrap items-center justify-center gap-0.5 rounded-2xl sm:rounded-full p-1 bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl max-w-full">
               {Object.keys(REGION_METADATA).map((cKey) => {
                 const isSelected = selectedCountry === cKey;
                 const accent = REGION_METADATA[cKey].accent;
@@ -982,7 +983,7 @@ export default function OrbitalHero3D({
                     key={cKey}
                     type="button"
                     onClick={() => onSelectCountry && onSelectCountry(cKey)}
-                    className={`relative px-4 py-1.5 rounded-full text-[12.5px] font-medium whitespace-nowrap transition-colors ${
+                    className={`relative px-2.5 sm:px-4 py-1.5 rounded-full text-[11.5px] sm:text-[12.5px] font-medium whitespace-nowrap transition-colors ${
                       isSelected ? 'text-white' : 'text-slate-400 hover:text-slate-100'
                     }`}
                   >
@@ -1065,13 +1066,13 @@ export default function OrbitalHero3D({
           transition={{ duration: 1, delay: 1.3, ease: EASE_OUT }}
           className="glass-pill pointer-events-auto rounded-[22px] pl-2 pr-2 py-2 flex items-center gap-2 max-w-full overflow-x-auto"
         >
-          <div className="flex items-center divide-x divide-white/[0.07]">
+          <div className="grid grid-cols-2 sm:flex sm:items-center sm:divide-x divide-white/[0.07] gap-y-1 sm:gap-y-0">
             {heroStats.map((s) => (
-              <div key={s.label} className="px-5 sm:px-7 py-1.5">
-                <div className={`font-mono text-[17px] sm:text-[20px] font-semibold tracking-tight ${s.tone}`}>
+              <div key={s.label} className="px-3 sm:px-7 py-1 sm:py-1.5">
+                <div className={`font-mono text-[15px] sm:text-[20px] font-semibold tracking-tight ${s.tone}`}>
                   <AnimatedNumber value={s.value} format={s.format} />
                 </div>
-                <div className="eyebrow mt-0.5 !text-[9.5px] !tracking-[0.2em] !text-slate-500">{s.label}</div>
+                <div className="eyebrow mt-0.5 !text-[9px] sm:!text-[9.5px] !tracking-[0.16em] sm:!tracking-[0.2em] !text-slate-500">{s.label}</div>
               </div>
             ))}
           </div>
