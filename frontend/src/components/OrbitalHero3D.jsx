@@ -1059,7 +1059,7 @@ export default function OrbitalHero3D({
       </AnimatePresence>
 
       {/* Floating glass telemetry strip */}
-      <div className="absolute z-30 bottom-6 inset-x-0 flex justify-center px-4 pointer-events-none">
+      <div className="absolute z-20 bottom-6 inset-x-0 flex justify-center px-4 pointer-events-none">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}

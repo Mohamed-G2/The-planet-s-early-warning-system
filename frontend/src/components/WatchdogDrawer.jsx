@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -196,19 +197,21 @@ export default function WatchdogDrawer({
     URL.revokeObjectURL(url);
   };
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <>
       {/* Frosted Slide-Over Drawer */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-[100] flex justify-end">
+          <div className="fixed inset-0 z-[9990] flex justify-end">
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
               onClick={onClose}
-              className="fixed inset-0 z-[80] bg-[#020408]/75 backdrop-blur-md"
+              className="fixed inset-0 z-[9990] bg-black/75 backdrop-blur-md"
             />
 
             <motion.aside
@@ -216,7 +219,7 @@ export default function WatchdogDrawer({
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={SPRING}
-              className="relative z-[90] w-full max-w-xl h-full bg-[#060912]/95 backdrop-blur-2xl border-l border-white/[0.09] shadow-[0_0_90px_rgba(0,0,0,0.9)] flex flex-col justify-between overflow-y-auto"
+              className="fixed inset-y-0 right-0 z-[9999] w-full max-w-xl h-full bg-[#060912]/95 backdrop-blur-2xl border-l border-white/[0.09] shadow-[0_0_90px_rgba(0,0,0,0.9)] flex flex-col justify-between overflow-y-auto"
             >
               <div>
                 <div className="px-6 py-4 border-b border-white/[0.07] flex items-center justify-between sticky top-0 bg-[#060912]/90 backdrop-blur-2xl z-20">
@@ -520,6 +523,7 @@ export default function WatchdogDrawer({
           </div>
         )}
       </AnimatePresence>
-    </>
+    </>,
+    document.body
   );
 }
