@@ -1076,13 +1076,19 @@ export default function OrbitalHero3D({
               </div>
             ))}
           </div>
-          <motion.a
-            href="#command-deck"
-            onClick={scrollToDeck}
+          <motion.button
+            type="button"
+            onClick={(e) => {
+              if (onExploreCommandDeck) {
+                onExploreCommandDeck();
+              } else {
+                scrollToDeck(e);
+              }
+            }}
             whileHover={{ scale: 1.04 }}
             whileTap={{ scale: 0.96 }}
             className="hidden md:flex items-center justify-center w-12 h-12 rounded-2xl bg-white/[0.05] hover:bg-white/[0.09] border border-white/[0.08] text-slate-200 shrink-0"
-            aria-label="Explore command deck"
+            aria-label="Open Tactical Map"
           >
             <motion.span
               animate={{ y: [0, 3, 0] }}
@@ -1090,7 +1096,7 @@ export default function OrbitalHero3D({
             >
               <ArrowDown className="w-4 h-4" />
             </motion.span>
-          </motion.a>
+          </motion.button>
         </motion.div>
       </div>
     </section>

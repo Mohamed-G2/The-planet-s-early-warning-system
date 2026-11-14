@@ -259,6 +259,17 @@ export default function TacticalMap2D({
     }
   }, [basemapMode]);
 
+  // Ensure Leaflet fills 100% of container when the Map tab mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.invalidateSize();
+        syncSplitClipPaths();
+      }
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [syncSplitClipPaths]);
+
   // Camera fly-to active country or preset
   useEffect(() => {
     const map = mapInstanceRef.current;

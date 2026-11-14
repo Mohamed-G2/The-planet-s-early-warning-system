@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FileDown } from 'lucide-react';
 import { SPRING, EASE_OUT } from './ui/primitives';
 
 const NAV_ITEMS = [
-  { id: 'orbital-globe', label: 'Globe' },
-  { id: 'tactical-map', label: 'Tactical Map' },
-  { id: 'burning-calendar', label: 'Calendar' },
+  { id: 'globe', label: 'Globe' },
+  { id: 'map', label: 'Tactical Map' },
+  { id: 'calendar', label: 'Calendar' },
   { id: 'telemetry', label: 'Telemetry' },
 ];
 
@@ -43,45 +43,62 @@ function HorusInsignia() {
   );
 }
 
-export default function Navbar({ onOpenDrawer }) {
-  const [activeId, setActiveId] = useState('orbital-globe');
+export default function Navbar({ activeTab = 'globe', onSelectTab, onOpenDrawer }) {
   const [hoverId, setHoverId] = useState(null);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
 
-  // Scroll-spy for the active section
+  // Always show navbar when switching tabs
   useEffect(() => {
-    const targets = NAV_ITEMS.map((n) => document.getElementById(n.id)).filter(Boolean);
-    if (!targets.length) return undefined;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
-        if (visible[0]) setActiveId(visible[0].target.id);
-      },
-      { rootMargin: '-35% 0px -55% 0px', threshold: [0, 0.25, 0.5, 1] }
-    );
-    targets.forEach((t) => observer.observe(t));
-    return () => observer.disconnect();
+    setIsVisible(true);
+    lastScrollYRef.current = typeof window !== 'undefined' ? window.scrollY : 0;
+  }, [activeTab]);
+
+  // Smart auto-hide on scroll down, reveal on scroll up
+  useEffect(() => {
+    const onScroll = () => {
+      const currentScrollY = window.scrollY;
+      const lastScrollY = lastScrollYRef.current;
+
+      if (currentScrollY > lastScrollY + 8 && currentScrollY > 60) {
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY - 5 || currentScrollY <= 60) {
+        setIsVisible(true);
+      }
+
+      lastScrollYRef.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const scrollTo = (e, id) => {
+  const handleNavClick = (e, id) => {
     e.preventDefault();
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (onSelectTab) {
+      onSelectTab(id);
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   return (
     <motion.header
       initial={{ opacity: 0, y: -24, scale: 0.96 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.9, delay: 0.15, ease: EASE_OUT }}
-      className="no-print fixed top-3 sm:top-5 left-1/2 z-40 w-[calc(100%-1rem)] max-w-[95vw] sm:max-w-[820px] select-none"
+      animate={{ opacity: isVisible ? 1 : 0, y: 0, scale: 1 }}
+      transition={{ duration: 0.45, ease: EASE_OUT }}
+      className={`no-print fixed top-3 sm:top-5 left-1/2 z-40 w-[calc(100%-1rem)] max-w-[95vw] sm:max-w-[820px] select-none transition-all duration-300 ease-out ${
+        isVisible
+          ? 'translate-y-0 opacity-100 pointer-events-auto'
+          : '-translate-y-28 opacity-0 pointer-events-none'
+      }`}
       style={{ x: '-50%' }}
     >
       <div className="glass-pill rounded-full px-3 py-2 sm:px-6 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-6">
         {/* Left — insignia + live pulse */}
         <a
-          href="#orbital-globe"
-          onClick={(e) => scrollTo(e, 'orbital-globe')}
+          href="#globe"
+          onClick={(e) => handleNavClick(e, 'globe')}
           className="flex items-center gap-2 sm:gap-2.5 shrink-0 group min-h-[36px]"
         >
           <HorusInsignia />
@@ -101,19 +118,19 @@ export default function Navbar({ onOpenDrawer }) {
           onMouseLeave={() => setHoverId(null)}
         >
           {NAV_ITEMS.map((item) => {
-            const isActive = activeId === item.id;
+            const isActive = activeTab === item.id;
             const isHover = hoverId === item.id;
             return (
-              <a
+              <button
                 key={item.id}
-                href={`#${item.id}`}
-                onClick={(e) => scrollTo(e, item.id)}
+                type="button"
+                onClick={(e) => handleNavClick(e, item.id)}
                 onMouseEnter={() => setHoverId(item.id)}
                 className={`relative px-3.5 py-1.5 rounded-full text-[12.5px] font-medium whitespace-nowrap transition-colors ${
                   isActive ? 'text-white' : 'text-slate-400 hover:text-slate-100'
                 }`}
               >
-                {isHover && (
+                {isHover && !isActive && (
                   <motion.span
                     layoutId="nav-hover"
                     transition={SPRING}
@@ -124,11 +141,11 @@ export default function Navbar({ onOpenDrawer }) {
                   <motion.span
                     layoutId="nav-active"
                     transition={SPRING}
-                    className="absolute left-3.5 right-3.5 -bottom-[3px] h-px bg-gradient-to-r from-transparent via-sky-300 to-transparent"
+                    className="absolute inset-0 rounded-full bg-white/[0.1] border border-sky-400/35 shadow-[0_0_16px_-4px_rgba(56,189,248,0.45)]"
                   />
                 )}
                 <span className="relative">{item.label}</span>
-              </a>
+              </button>
             );
           })}
         </nav>
@@ -152,18 +169,20 @@ export default function Navbar({ onOpenDrawer }) {
         className="flex md:hidden items-center gap-1 overflow-x-auto no-scrollbar mt-1.5 px-2 py-1 glass-pill rounded-full"
       >
         {NAV_ITEMS.map((item) => {
-          const isActive = activeId === item.id;
+          const isActive = activeTab === item.id;
           return (
-            <a
+            <button
               key={item.id}
-              href={`#${item.id}`}
-              onClick={(e) => scrollTo(e, item.id)}
+              type="button"
+              onClick={(e) => handleNavClick(e, item.id)}
               className={`px-3 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${
-                isActive ? 'bg-white/[0.08] text-white' : 'text-slate-400 hover:text-slate-200'
+                isActive
+                  ? 'bg-sky-400/20 border border-sky-400/40 text-white'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               {item.label}
-            </a>
+            </button>
           );
         })}
       </nav>

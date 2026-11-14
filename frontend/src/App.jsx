@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Navbar from './components/Navbar';
 import OrbitalHero3D from './components/OrbitalHero3D';
 import MegafirePresets from './components/MegafirePresets';
@@ -20,6 +21,7 @@ import {
 } from './services/telemetryService';
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState('globe');
   const [telemetry, setTelemetry] = useState(() => getInitialTelemetry());
   const [selectedCountry, setSelectedCountry] = useState('USA');
   const [selectedAudience, setSelectedAudience] = useState('Scientists');
@@ -274,6 +276,21 @@ export default function App() {
     setDrawerOpen(open);
   }, []);
 
+  const handleTabChange = useCallback((tab) => {
+    setActiveTab(tab);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  const TAB_ORDER = [
+    { id: 'globe', label: 'Globe' },
+    { id: 'map', label: 'Tactical Map' },
+    { id: 'calendar', label: 'Calendar' },
+    { id: 'telemetry', label: 'Telemetry' },
+  ];
+  const currentTabIdx = TAB_ORDER.findIndex((t) => t.id === activeTab);
+  const prevTab = currentTabIdx > 0 ? TAB_ORDER[currentTabIdx - 1] : null;
+  const nextTab = currentTabIdx >= 0 && currentTabIdx < TAB_ORDER.length - 1 ? TAB_ORDER[currentTabIdx + 1] : null;
+
   const activeCountryData =
     telemetry?.countries?.[selectedCountry] || telemetry?.countries?.USA || {};
   const hasCustomDataset = Boolean(telemetry?.countries?.[CUSTOM_DATASET_KEY]);
@@ -292,143 +309,183 @@ export default function App() {
         }}
       />
 
-      <Navbar onOpenDrawer={(tab) => handleOpenDrawer(tab, true)} />
-
-      <OrbitalHero3D
-        telemetry={telemetry}
-        selectedCountry={selectedCountry}
-        onSelectCountry={handleSelectCountry}
-        selectedAudience={selectedAudience}
+      <Navbar
+        activeTab={activeTab}
+        onSelectTab={handleTabChange}
+        onOpenDrawer={(tab) => handleOpenDrawer(tab, true)}
       />
 
-      <main
-        id="command-deck"
-        className="relative z-20 max-w-[1480px] mx-auto px-3 sm:px-8 lg:px-12 py-10 sm:py-16 space-y-6 sm:space-y-8"
-      >
-        {/* Minimal Executive Command Header */}
-        <Reveal y={18} className="flex flex-wrap items-center justify-between gap-4 pb-2">
-          <div className="flex items-center gap-3.5">
-            <span
-              className="w-2.5 h-2.5 rounded-full"
-              style={{
-                backgroundColor: regionAccent,
-                boxShadow: `0 0 18px ${regionAccent}`,
-              }}
-            />
-            <h2 className="font-sans text-2xl sm:text-3xl font-bold tracking-[-0.035em] text-white whitespace-nowrap">
-              {selectedCountry}
-            </h2>
-            <span className="h-4 w-px bg-white/[0.12]" />
-            <span className="eyebrow !text-sky-300">Command Deck</span>
-          </div>
+      {activeTab === 'globe' ? (
+        <OrbitalHero3D
+          telemetry={telemetry}
+          selectedCountry={selectedCountry}
+          onSelectCountry={handleSelectCountry}
+          selectedAudience={selectedAudience}
+          onExploreCommandDeck={() => handleTabChange('map')}
+        />
+      ) : (
+        <main
+          id="command-deck"
+          className="relative z-20 max-w-7xl mx-auto pt-28 sm:pt-24 pb-16 px-4 sm:px-8 space-y-6 sm:space-y-8"
+        >
+          {/* Minimal Executive Command Header */}
+          <Reveal y={18} className="flex flex-wrap items-center justify-between gap-4 pb-2">
+            <div className="flex items-center gap-3.5">
+              <span
+                className="w-2.5 h-2.5 rounded-full"
+                style={{
+                  backgroundColor: regionAccent,
+                  boxShadow: `0 0 18px ${regionAccent}`,
+                }}
+              />
+              <h2 className="font-sans text-2xl sm:text-3xl font-bold tracking-[-0.035em] text-white whitespace-nowrap">
+                {selectedCountry}
+              </h2>
+              <span className="h-4 w-px bg-white/[0.12]" />
+              <span className="eyebrow !text-sky-300">Command Deck</span>
+            </div>
 
-          <div className="glass-pill rounded-2xl sm:rounded-full px-3 sm:px-4 py-1.5 flex flex-wrap items-center gap-2 sm:gap-3 font-mono text-[10.5px] sm:text-[11px] tabular-nums text-slate-400 max-w-full">
-            <span className="flex items-center gap-1.5 text-emerald-300">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              {backendStatus.online ? 'DuckDB Live' : 'Embedded Telemetry'}
-            </span>
-            <span className="text-white/15">·</span>
-            <span>
-              AOI{' '}
-              <strong className="text-slate-200">
-                [{Number(aoiBbox.lat_min).toFixed(1)}°, {Number(aoiBbox.lon_min).toFixed(1)}°] → [
-                {Number(aoiBbox.lat_max).toFixed(1)}°, {Number(aoiBbox.lon_max).toFixed(1)}°]
-              </strong>
-            </span>
-          </div>
-        </Reveal>
+            <div className="glass-pill rounded-2xl sm:rounded-full px-3 sm:px-4 py-1.5 flex flex-wrap items-center gap-2 sm:gap-3 font-mono text-[10.5px] sm:text-[11px] tabular-nums text-slate-400 max-w-full">
+              <span className="flex items-center gap-1.5 text-emerald-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                {backendStatus.online ? 'DuckDB Live' : 'Embedded Telemetry'}
+              </span>
+              <span className="text-white/15">·</span>
+              <span>
+                AOI{' '}
+                <strong className="text-slate-200">
+                  [{Number(aoiBbox.lat_min).toFixed(1)}°, {Number(aoiBbox.lon_min).toFixed(1)}°] → [
+                  {Number(aoiBbox.lat_max).toFixed(1)}°, {Number(aoiBbox.lon_max).toFixed(1)}°]
+                </strong>
+              </span>
+            </div>
+          </Reveal>
 
-        {/* Unified Control Dock: Time-Machine Presets + Region / AOI / Date / Palette */}
-        <Reveal y={22}>
-          <SpotlightCard glow={regionAccent} className="overflow-hidden divide-y divide-white/[0.06]">
-            <MegafirePresets
-              activePresetId={activePresetId}
-              onSelectPreset={handleSelectPreset}
-              onClearPreset={handleClearPreset}
-            />
-            <ControlBar
+          {/* Unified Control Dock: Time-Machine Presets + Region / AOI / Date / Palette */}
+          <Reveal y={22}>
+            <SpotlightCard glow={regionAccent} className="overflow-hidden divide-y divide-white/[0.06]">
+              <MegafirePresets
+                activePresetId={activePresetId}
+                onSelectPreset={handleSelectPreset}
+                onClearPreset={handleClearPreset}
+              />
+              <ControlBar
+                selectedCountry={selectedCountry}
+                countryTelemetry={activeCountryData}
+                hasCustomDataset={hasCustomDataset}
+                onSelectCountry={handleSelectCountry}
+                aoiBbox={aoiBbox}
+                onApplyAOI={handleApplyAOI}
+                onResetAOI={handleResetAOI}
+                isDrawingAOI={isDrawingAOI}
+                onToggleDrawAOI={() => setIsDrawingAOI((prev) => !prev)}
+                yearFrom={yearFrom}
+                yearTo={yearTo}
+                selectedMonth={selectedMonth}
+                onChangeYearRange={handleChangeYearRange}
+                onChangeMonth={handleChangeMonth}
+                selectedPalette={selectedPalette}
+                onSelectPalette={setSelectedPalette}
+                onOpenDrawer={(tab) => handleOpenDrawer(tab, true)}
+                onOpenIngest={() => setIngestModalOpen(true)}
+                aoiLoading={aoiLoading}
+              />
+            </SpotlightCard>
+          </Reveal>
+
+          {/* Dedicated Active Tab Workspace */}
+          {activeTab === 'map' && (
+            <TacticalMap2D
               selectedCountry={selectedCountry}
               countryTelemetry={activeCountryData}
-              hasCustomDataset={hasCustomDataset}
-              onSelectCountry={handleSelectCountry}
+              aoiResult={aoiResult}
               aoiBbox={aoiBbox}
               onApplyAOI={handleApplyAOI}
-              onResetAOI={handleResetAOI}
               isDrawingAOI={isDrawingAOI}
-              onToggleDrawAOI={() => setIsDrawingAOI((prev) => !prev)}
-              yearFrom={yearFrom}
-              yearTo={yearTo}
-              selectedMonth={selectedMonth}
-              onChangeYearRange={handleChangeYearRange}
-              onChangeMonth={handleChangeMonth}
+              onToggleDrawAOI={setIsDrawingAOI}
               selectedPalette={selectedPalette}
-              onSelectPalette={setSelectedPalette}
-              onOpenDrawer={(tab) => handleOpenDrawer(tab, true)}
-              onOpenIngest={() => setIngestModalOpen(true)}
-              aoiLoading={aoiLoading}
+              mapViewTarget={mapViewTarget}
+              selectedHotspot={selectedHotspot}
+              onSelectHotspot={setSelectedHotspot}
             />
-          </SpotlightCard>
-        </Reveal>
+          )}
 
-        {/* Row 1: Tactical Map (8 cols) + Live Nocturnal & Carbon Gauges (4 cols) */}
-        <TacticalMap2D
-          selectedCountry={selectedCountry}
-          countryTelemetry={activeCountryData}
-          aoiResult={aoiResult}
-          aoiBbox={aoiBbox}
-          onApplyAOI={handleApplyAOI}
-          isDrawingAOI={isDrawingAOI}
-          onToggleDrawAOI={setIsDrawingAOI}
-          selectedPalette={selectedPalette}
-          mapViewTarget={mapViewTarget}
-          selectedHotspot={selectedHotspot}
-          onSelectHotspot={setSelectedHotspot}
-        />
+          {activeTab === 'calendar' && (
+            <BurningCalendar
+              selectedCountry={selectedCountry}
+              countryTelemetry={activeCountryData}
+              selectedPalette={selectedPalette}
+              onSelectYearMonth={handleSelectYearMonthFromCalendar}
+            />
+          )}
 
-        {/* Row 2: Harmonized Burning Activity Calendar (12 cols) */}
-        <BurningCalendar
-          selectedCountry={selectedCountry}
-          countryTelemetry={activeCountryData}
-          selectedPalette={selectedPalette}
-          onSelectYearMonth={handleSelectYearMonthFromCalendar}
-        />
+          {activeTab === 'telemetry' && (
+            <AnalyticsSuite
+              selectedCountry={selectedCountry}
+              countryTelemetry={activeCountryData}
+              aoiResult={aoiResult}
+              selectedAudience={selectedAudience}
+              onSelectAudience={setSelectedAudience}
+              selectedHotspot={selectedHotspot}
+            />
+          )}
 
-        {/* Row 3: KPI Telemetry Ribbon + 3-Col XAI & Harmonization Bento */}
-        <AnalyticsSuite
-          selectedCountry={selectedCountry}
-          countryTelemetry={activeCountryData}
-          aoiResult={aoiResult}
-          selectedAudience={selectedAudience}
-          onSelectAudience={setSelectedAudience}
-          selectedHotspot={selectedHotspot}
-        />
+          {/* Sleek Bottom Section Switcher */}
+          <div className="pt-4 flex items-center justify-between gap-4 border-t border-white/[0.06]">
+            {prevTab ? (
+              <button
+                type="button"
+                onClick={() => handleTabChange(prevTab.id)}
+                className="glass-pill rounded-full px-4 py-2.5 flex items-center gap-2 text-xs font-mono text-slate-300 hover:text-white hover:border-white/20 transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 text-sky-300" />
+                <span>Previous: {prevTab.label}</span>
+              </button>
+            ) : (
+              <div />
+            )}
 
-        {/* Row 4 / Slide-Over Drawer: SitRep, Watchdog & 13-Col CSV Export */}
-        <WatchdogDrawer
-          isOpen={drawerOpen}
-          activeTab={drawerTab}
-          onChangeTab={handleOpenDrawer}
-          onClose={() => setDrawerOpen(false)}
-          selectedCountry={selectedCountry}
-          countryTelemetry={activeCountryData}
-          aoiResult={aoiResult}
-          aoiBbox={aoiBbox}
-          selectedAudience={selectedAudience}
-          yearFrom={yearFrom}
-          yearTo={yearTo}
-          selectedMonth={selectedMonth}
-          onTriggerPreset={handleSelectPreset}
-          onOpenIngest={() => setIngestModalOpen(true)}
-        />
+            {nextTab ? (
+              <button
+                type="button"
+                onClick={() => handleTabChange(nextTab.id)}
+                className="glass-pill rounded-full px-4 py-2.5 flex items-center gap-2 text-xs font-mono text-slate-200 hover:text-white hover:border-sky-400/40 transition-colors"
+              >
+                <span>Next: {nextTab.label}</span>
+                <ArrowRight className="w-3.5 h-3.5 text-sky-300" />
+              </button>
+            ) : (
+              <div />
+            )}
+          </div>
+        </main>
+      )}
 
-        <IngestModal
-          isOpen={ingestModalOpen}
-          onClose={() => setIngestModalOpen(false)}
-          selectedCountry={selectedCountry === CUSTOM_DATASET_KEY ? 'USA' : selectedCountry}
-          aoiBbox={aoiBbox}
-          onIngestComplete={handleIngestComplete}
-        />
-      </main>
+      {/* Slide-Over Drawer & Ingest Modal (available from any tab) */}
+      <WatchdogDrawer
+        isOpen={drawerOpen}
+        activeTab={drawerTab}
+        onChangeTab={handleOpenDrawer}
+        onClose={() => setDrawerOpen(false)}
+        selectedCountry={selectedCountry}
+        countryTelemetry={activeCountryData}
+        aoiResult={aoiResult}
+        aoiBbox={aoiBbox}
+        selectedAudience={selectedAudience}
+        yearFrom={yearFrom}
+        yearTo={yearTo}
+        selectedMonth={selectedMonth}
+        onTriggerPreset={handleSelectPreset}
+        onOpenIngest={() => setIngestModalOpen(true)}
+      />
+
+      <IngestModal
+        isOpen={ingestModalOpen}
+        onClose={() => setIngestModalOpen(false)}
+        selectedCountry={selectedCountry === CUSTOM_DATASET_KEY ? 'USA' : selectedCountry}
+        aoiBbox={aoiBbox}
+        onIngestComplete={handleIngestComplete}
+      />
     </div>
   );
 }
