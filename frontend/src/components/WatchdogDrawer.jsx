@@ -370,8 +370,11 @@ export default function WatchdogDrawer({
                           <label className="block text-[10px] uppercase tracking-wider text-slate-400 mb-1.5">
                             FRP Threshold (MW)
                           </label>
-                          <input lang="en"
-                            type="number"
+                          <input
+                            lang="en"
+                            dir="ltr"
+                            type="text"
+                            inputMode="decimal"
                             value={frpThreshold}
                             onChange={(e) => setFrpThreshold(e.target.value)}
                             className="glass-input"
@@ -382,11 +385,11 @@ export default function WatchdogDrawer({
                           <label className="block text-[10px] uppercase tracking-wider text-slate-400 mb-1.5">
                             Severity (0–1)
                           </label>
-                          <input lang="en"
-                            type="number"
-                            step="0.05"
-                            min="0"
-                            max="1"
+                          <input
+                            lang="en"
+                            dir="ltr"
+                            type="text"
+                            inputMode="decimal"
                             value={sevThreshold}
                             onChange={(e) => setSevThreshold(e.target.value)}
                             className="glass-input"

@@ -242,9 +242,11 @@ export default function ControlBar({
                 <label className="block font-mono text-[10px] uppercase tracking-wider text-slate-500 mb-1 whitespace-nowrap">
                   {f.label}
                 </label>
-                <input lang="en"
-                  type="number"
-                  step="0.1"
+                <input
+                  lang="en"
+                  dir="ltr"
+                  type="text"
+                  inputMode="decimal"
                   value={draftBbox[f.key]}
                   onChange={(e) => setDraftBbox((p) => ({ ...p, [f.key]: e.target.value }))}
                   className="glass-input"

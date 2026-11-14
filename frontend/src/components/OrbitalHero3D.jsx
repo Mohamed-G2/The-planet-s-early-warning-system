@@ -883,9 +883,11 @@ export default function OrbitalHero3D({
   ];
 
   const titleWords = [
-    { text: 'ORBITAL', gradient: false },
-    { text: 'FIRE', gradient: false },
-    { text: 'HARMONIZATION', gradient: true },
+    { text: 'THE', gradient: false },
+    { text: 'PLANET', gradient: false },
+    { text: 'EARLY', gradient: true },
+    { text: 'WARNING', gradient: true },
+    { text: 'SYSTEM', gradient: true },
   ];
 
   return (
