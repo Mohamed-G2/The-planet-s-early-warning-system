@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Navbar from './components/Navbar';
 import OrbitalHero3D from './components/OrbitalHero3D';
 import MegafirePresets from './components/MegafirePresets';
@@ -21,7 +20,6 @@ import {
 } from './services/telemetryService';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('globe');
   const [telemetry, setTelemetry] = useState(() => getInitialTelemetry());
   const [selectedCountry, setSelectedCountry] = useState('USA');
   const [selectedAudience, setSelectedAudience] = useState('Scientists');
@@ -276,21 +274,6 @@ export default function App() {
     setDrawerOpen(open);
   }, []);
 
-  const handleTabChange = useCallback((tab) => {
-    setActiveTab(tab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
-
-  const TAB_ORDER = [
-    { id: 'globe', label: 'Globe' },
-    { id: 'map', label: 'Tactical Map' },
-    { id: 'calendar', label: 'Calendar' },
-    { id: 'telemetry', label: 'Telemetry' },
-  ];
-  const currentTabIdx = TAB_ORDER.findIndex((t) => t.id === activeTab);
-  const prevTab = currentTabIdx > 0 ? TAB_ORDER[currentTabIdx - 1] : null;
-  const nextTab = currentTabIdx >= 0 && currentTabIdx < TAB_ORDER.length - 1 ? TAB_ORDER[currentTabIdx + 1] : null;
-
   const activeCountryData =
     telemetry?.countries?.[selectedCountry] || telemetry?.countries?.USA || {};
   const hasCustomDataset = Boolean(telemetry?.countries?.[CUSTOM_DATASET_KEY]);
@@ -309,25 +292,21 @@ export default function App() {
         }}
       />
 
-      <Navbar
-        activeTab={activeTab}
-        onSelectTab={handleTabChange}
-        onOpenDrawer={(tab) => handleOpenDrawer(tab, true)}
+      <Navbar onOpenDrawer={(tab) => handleOpenDrawer(tab, true)} />
+
+      <OrbitalHero3D
+        telemetry={telemetry}
+        selectedCountry={selectedCountry}
+        onSelectCountry={handleSelectCountry}
+        selectedAudience={selectedAudience}
       />
 
-      {activeTab === 'globe' ? (
-        <OrbitalHero3D
-          telemetry={telemetry}
-          selectedCountry={selectedCountry}
-          onSelectCountry={handleSelectCountry}
-          selectedAudience={selectedAudience}
-          onExploreCommandDeck={() => handleTabChange('map')}
-        />
-      ) : (
-        <main
-          id="command-deck"
-          className="relative z-20 max-w-7xl mx-auto pt-28 sm:pt-24 pb-16 px-4 sm:px-8 space-y-6 sm:space-y-8"
-        >
+      <main
+        id="command-deck"
+        className="relative z-20 max-w-7xl mx-auto px-4 sm:px-8 pb-20 space-y-12 sm:space-y-16"
+      >
+        {/* Section 1: Command Deck Controls + Tactical Map */}
+        <div className="min-h-[85vh] py-14 sm:py-20 flex flex-col justify-center space-y-6 sm:space-y-8">
           {/* Minimal Executive Command Header */}
           <Reveal y={18} className="flex flex-wrap items-center justify-between gap-4 pb-2">
             <div className="flex items-center gap-3.5">
@@ -361,7 +340,7 @@ export default function App() {
             </div>
           </Reveal>
 
-          {/* Unified Control Dock: Time-Machine Presets + Region / AOI / Date / Palette */}
+          {/* Unified Control Dock: Time-Machine Presets + AOI / Date / Palette */}
           <Reveal y={22}>
             <SpotlightCard glow={regionAccent} className="overflow-hidden divide-y divide-white/[0.06]">
               <MegafirePresets
@@ -393,73 +372,43 @@ export default function App() {
             </SpotlightCard>
           </Reveal>
 
-          {/* Dedicated Active Tab Workspace */}
-          {activeTab === 'map' && (
-            <TacticalMap2D
-              selectedCountry={selectedCountry}
-              countryTelemetry={activeCountryData}
-              aoiResult={aoiResult}
-              aoiBbox={aoiBbox}
-              onApplyAOI={handleApplyAOI}
-              isDrawingAOI={isDrawingAOI}
-              onToggleDrawAOI={setIsDrawingAOI}
-              selectedPalette={selectedPalette}
-              mapViewTarget={mapViewTarget}
-              selectedHotspot={selectedHotspot}
-              onSelectHotspot={setSelectedHotspot}
-            />
-          )}
+          <TacticalMap2D
+            selectedCountry={selectedCountry}
+            countryTelemetry={activeCountryData}
+            aoiResult={aoiResult}
+            aoiBbox={aoiBbox}
+            onApplyAOI={handleApplyAOI}
+            isDrawingAOI={isDrawingAOI}
+            onToggleDrawAOI={setIsDrawingAOI}
+            selectedPalette={selectedPalette}
+            mapViewTarget={mapViewTarget}
+            selectedHotspot={selectedHotspot}
+            onSelectHotspot={setSelectedHotspot}
+          />
+        </div>
 
-          {activeTab === 'calendar' && (
-            <BurningCalendar
-              selectedCountry={selectedCountry}
-              countryTelemetry={activeCountryData}
-              selectedPalette={selectedPalette}
-              onSelectYearMonth={handleSelectYearMonthFromCalendar}
-            />
-          )}
+        {/* Section 2: Harmonized Burning Activity Calendar */}
+        <div className="min-h-[85vh] py-14 sm:py-20 flex flex-col justify-center">
+          <BurningCalendar
+            selectedCountry={selectedCountry}
+            countryTelemetry={activeCountryData}
+            selectedPalette={selectedPalette}
+            onSelectYearMonth={handleSelectYearMonthFromCalendar}
+          />
+        </div>
 
-          {activeTab === 'telemetry' && (
-            <AnalyticsSuite
-              selectedCountry={selectedCountry}
-              countryTelemetry={activeCountryData}
-              aoiResult={aoiResult}
-              selectedAudience={selectedAudience}
-              onSelectAudience={setSelectedAudience}
-              selectedHotspot={selectedHotspot}
-            />
-          )}
-
-          {/* Sleek Bottom Section Switcher */}
-          <div className="pt-4 flex items-center justify-between gap-4 border-t border-white/[0.06]">
-            {prevTab ? (
-              <button
-                type="button"
-                onClick={() => handleTabChange(prevTab.id)}
-                className="glass-pill rounded-full px-4 py-2.5 flex items-center gap-2 text-xs font-mono text-slate-300 hover:text-white hover:border-white/20 transition-colors"
-              >
-                <ArrowLeft className="w-3.5 h-3.5 text-sky-300" />
-                <span>Previous: {prevTab.label}</span>
-              </button>
-            ) : (
-              <div />
-            )}
-
-            {nextTab ? (
-              <button
-                type="button"
-                onClick={() => handleTabChange(nextTab.id)}
-                className="glass-pill rounded-full px-4 py-2.5 flex items-center gap-2 text-xs font-mono text-slate-200 hover:text-white hover:border-sky-400/40 transition-colors"
-              >
-                <span>Next: {nextTab.label}</span>
-                <ArrowRight className="w-3.5 h-3.5 text-sky-300" />
-              </button>
-            ) : (
-              <div />
-            )}
-          </div>
-        </main>
-      )}
+        {/* Section 3: Telemetry & XAI Analytics */}
+        <div className="min-h-[85vh] py-14 sm:py-20 flex flex-col justify-center">
+          <AnalyticsSuite
+            selectedCountry={selectedCountry}
+            countryTelemetry={activeCountryData}
+            aoiResult={aoiResult}
+            selectedAudience={selectedAudience}
+            onSelectAudience={setSelectedAudience}
+            selectedHotspot={selectedHotspot}
+          />
+        </div>
+      </main>
 
       {/* Slide-Over Drawer & Ingest Modal (available from any tab) */}
       <WatchdogDrawer

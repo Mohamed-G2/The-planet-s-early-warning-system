@@ -106,53 +106,28 @@ export default function ControlBar({
 
   return (
     <div className="divide-y divide-white/[0.06]">
-      {/* Row 1: Clean 5 Region Tabs (no year badges) + Drawer Actions */}
-      <div className="px-5 sm:px-6 py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+      {/* Row 1: Active Basin Badge + Drawer & Ingestion Actions */}
+      <div className="px-5 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 shrink-0 lg:w-[142px]">
+          <div className="flex items-center gap-2 shrink-0">
             <Compass className="w-4 h-4 text-sky-300" strokeWidth={1.75} />
             <span className="eyebrow !text-slate-300">Target Basin</span>
+            <span className="text-white/20">·</span>
+            <span className="font-mono text-xs font-semibold text-white">{selectedCountry}</span>
           </div>
-
-          <div
-            role="tablist"
-            aria-label="Target Basin"
-            className="inline-flex flex-wrap items-center gap-0.5 rounded-full p-1 bg-white/[0.03] border border-white/[0.07]"
-          >
-            {basinKeys.map((cKey) => {
-              const meta = getRegionMeta(cKey, cKey === CUSTOM_DATASET_KEY ? countryTelemetry : null);
-              const isSelected = selectedCountry === cKey;
-              return (
-                <button
-                  key={cKey}
-                  type="button"
-                  role="tab"
-                  aria-selected={isSelected}
-                  onClick={() => onSelectCountry && onSelectCountry(cKey)}
-                  className={`relative px-3.5 py-1.5 rounded-full text-[12.5px] font-medium whitespace-nowrap transition-colors flex items-center gap-2 ${
-                    isSelected ? 'text-white' : 'text-slate-400 hover:text-slate-100'
-                  }`}
-                >
-                  {isSelected && (
-                    <motion.span
-                      layoutId="dock-region"
-                      transition={SPRING}
-                      className="absolute inset-0 rounded-full"
-                      style={{
-                        background: `${meta.accent}24`,
-                        boxShadow: `inset 0 1px 0 0 rgba(255,255,255,0.14), 0 0 0 1px ${meta.accent}55`,
-                      }}
-                    />
-                  )}
-                  <span
-                    className="relative w-1.5 h-1.5 rounded-full shrink-0"
-                    style={{ backgroundColor: meta.accent }}
-                  />
-                  <span className="relative">{cKey}</span>
-                </button>
-              );
-            })}
-          </div>
+          {hasCustomDataset && (
+            <button
+              type="button"
+              onClick={() => onSelectCountry && onSelectCountry(CUSTOM_DATASET_KEY)}
+              className={`px-3 py-1 rounded-full text-[11.5px] font-mono border transition-colors ${
+                selectedCountry === CUSTOM_DATASET_KEY
+                  ? 'bg-cyan-400/20 text-cyan-200 border-cyan-400/50'
+                  : 'bg-white/[0.03] text-slate-400 border-white/[0.08] hover:text-white'
+              }`}
+            >
+              {CUSTOM_DATASET_KEY}
+            </button>
+          )}
         </div>
 
         {/* Drawer & Ingestion Actions */}

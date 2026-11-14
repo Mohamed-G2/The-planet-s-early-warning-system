@@ -4,9 +4,9 @@ import { FileDown } from 'lucide-react';
 import { SPRING, EASE_OUT } from './ui/primitives';
 
 const NAV_ITEMS = [
-  { id: 'globe', label: 'Globe' },
-  { id: 'map', label: 'Tactical Map' },
-  { id: 'calendar', label: 'Calendar' },
+  { id: 'orbital-globe', label: 'Globe' },
+  { id: 'tactical-map', label: 'Tactical Map' },
+  { id: 'burning-calendar', label: 'Calendar' },
   { id: 'telemetry', label: 'Telemetry' },
 ];
 
@@ -43,16 +43,28 @@ function HorusInsignia() {
   );
 }
 
-export default function Navbar({ activeTab = 'globe', onSelectTab, onOpenDrawer }) {
+export default function Navbar({ onOpenDrawer }) {
+  const [activeId, setActiveId] = useState('orbital-globe');
   const [hoverId, setHoverId] = useState(null);
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollYRef = useRef(0);
 
-  // Always show navbar when switching tabs
+  // Scroll-spy for the active section
   useEffect(() => {
-    setIsVisible(true);
-    lastScrollYRef.current = typeof window !== 'undefined' ? window.scrollY : 0;
-  }, [activeTab]);
+    const targets = NAV_ITEMS.map((n) => document.getElementById(n.id)).filter(Boolean);
+    if (!targets.length) return undefined;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        if (visible[0]) setActiveId(visible[0].target.id);
+      },
+      { rootMargin: '-35% 0px -45% 0px', threshold: [0, 0.2, 0.5, 0.8] }
+    );
+    targets.forEach((t) => observer.observe(t));
+    return () => observer.disconnect();
+  }, []);
 
   // Smart auto-hide on scroll down, reveal on scroll up
   useEffect(() => {
@@ -75,11 +87,8 @@ export default function Navbar({ activeTab = 'globe', onSelectTab, onOpenDrawer 
 
   const handleNavClick = (e, id) => {
     e.preventDefault();
-    if (onSelectTab) {
-      onSelectTab(id);
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    setActiveId(id);
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
@@ -97,8 +106,8 @@ export default function Navbar({ activeTab = 'globe', onSelectTab, onOpenDrawer 
       <div className="glass-pill rounded-full px-3 py-2 sm:px-6 sm:py-2.5 flex items-center justify-between gap-2 sm:gap-6">
         {/* Left — insignia + live pulse */}
         <a
-          href="#globe"
-          onClick={(e) => handleNavClick(e, 'globe')}
+          href="#orbital-globe"
+          onClick={(e) => handleNavClick(e, 'orbital-globe')}
           className="flex items-center gap-2 sm:gap-2.5 shrink-0 group min-h-[36px]"
         >
           <HorusInsignia />
@@ -118,7 +127,7 @@ export default function Navbar({ activeTab = 'globe', onSelectTab, onOpenDrawer 
           onMouseLeave={() => setHoverId(null)}
         >
           {NAV_ITEMS.map((item) => {
-            const isActive = activeTab === item.id;
+            const isActive = activeId === item.id;
             const isHover = hoverId === item.id;
             return (
               <button
@@ -169,7 +178,7 @@ export default function Navbar({ activeTab = 'globe', onSelectTab, onOpenDrawer 
         className="flex md:hidden items-center gap-1 overflow-x-auto no-scrollbar mt-1.5 px-2 py-1 glass-pill rounded-full"
       >
         {NAV_ITEMS.map((item) => {
-          const isActive = activeTab === item.id;
+          const isActive = activeId === item.id;
           return (
             <button
               key={item.id}
