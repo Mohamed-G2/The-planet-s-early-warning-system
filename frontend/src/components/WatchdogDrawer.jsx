@@ -204,17 +204,19 @@ export default function WatchdogDrawer({
       {/* Frosted Slide-Over Drawer */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed inset-0 z-[9990] flex justify-end">
+          <div data-sitrep-wrapper="true" className="fixed inset-0 z-[9990] flex justify-end">
             <motion.div
+              data-no-print="true"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
               onClick={onClose}
-              className="fixed inset-0 z-[9990] bg-black/75 backdrop-blur-md"
+              className="fixed inset-0 z-[9990] bg-black/75 backdrop-blur-md print:hidden"
             />
 
             <motion.aside
+              data-sitrep-drawer="true"
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
@@ -222,7 +224,23 @@ export default function WatchdogDrawer({
               className="fixed inset-y-0 right-0 z-[9999] w-full max-w-xl h-full bg-[#060912]/95 backdrop-blur-2xl border-l border-white/[0.09] shadow-[0_0_90px_rgba(0,0,0,0.9)] flex flex-col justify-between overflow-y-auto"
             >
               <div>
-                <div className="px-6 py-4 border-b border-white/[0.07] flex items-center justify-between sticky top-0 bg-[#060912]/90 backdrop-blur-2xl z-20">
+                {/* Print-Only Formal Mission Header */}
+                <div className="hidden print:flex items-center justify-between pb-4 mb-4 border-b border-slate-300">
+                  <div>
+                    <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-600">
+                      THE PLANET&apos;S EARLY WARNING SYSTEM · EAGLES OF HORUS
+                    </div>
+                    <h1 className="font-sans text-lg font-bold text-slate-900 mt-0.5">
+                      NASA FIRMS Cross-Sensor Harmonization SitRep
+                    </h1>
+                  </div>
+                  <div className="text-right font-mono text-[11px] text-slate-600">
+                    <div>{selectedCountry} · {selectedAudience}</div>
+                    <div>{new Date().toISOString().slice(0, 10)}</div>
+                  </div>
+                </div>
+
+                <div className="px-6 py-4 border-b border-white/[0.07] flex items-center justify-between sticky top-0 bg-[#060912]/90 backdrop-blur-2xl z-20 print:hidden" data-no-print="true">
                   <div className="flex items-center gap-2.5 whitespace-nowrap">
                     <span className="font-sans text-base font-semibold tracking-tight text-white">
                       {selectedCountry}
@@ -240,7 +258,7 @@ export default function WatchdogDrawer({
                   </button>
                 </div>
 
-                <div className="px-6 py-3.5 border-b border-white/[0.07]">
+                <div className="px-6 py-3.5 border-b border-white/[0.07] print:hidden" data-no-print="true">
                   <SegmentedControl
                     options={DRAWER_TABS}
                     value={activeTab}
@@ -311,7 +329,7 @@ export default function WatchdogDrawer({
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 print:hidden" data-no-print="true">
                       <button
                         type="button"
                         onClick={handleDownloadSitRepFile}
