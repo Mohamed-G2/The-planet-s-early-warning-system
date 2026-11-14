@@ -74,7 +74,7 @@ export default function Navbar({ onOpenDrawer }) {
       initial={{ opacity: 0, y: -24, scale: 0.96 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.9, delay: 0.15, ease: EASE_OUT }}
-      className="no-print fixed top-5 left-1/2 z-50 w-[calc(100%-2rem)] max-w-[820px] select-none"
+      className="no-print fixed top-5 left-1/2 z-40 w-[calc(100%-2rem)] max-w-[820px] select-none"
       style={{ x: '-50%' }}
     >
       <div className="glass-pill rounded-full px-4 sm:px-6 py-2.5 flex items-center justify-between gap-6">

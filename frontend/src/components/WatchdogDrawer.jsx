@@ -208,7 +208,7 @@ export default function WatchdogDrawer({
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
               onClick={onClose}
-              className="fixed inset-0 bg-[#020408]/75 backdrop-blur-md"
+              className="fixed inset-0 z-[80] bg-[#020408]/75 backdrop-blur-md"
             />
 
             <motion.aside
@@ -216,7 +216,7 @@ export default function WatchdogDrawer({
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={SPRING}
-              className="relative z-10 w-full max-w-xl h-full bg-[#060912]/95 backdrop-blur-2xl border-l border-white/[0.09] shadow-[0_0_90px_rgba(0,0,0,0.9)] flex flex-col justify-between overflow-y-auto"
+              className="relative z-[90] w-full max-w-xl h-full bg-[#060912]/95 backdrop-blur-2xl border-l border-white/[0.09] shadow-[0_0_90px_rgba(0,0,0,0.9)] flex flex-col justify-between overflow-y-auto"
             >
               <div>
                 <div className="px-6 py-4 border-b border-white/[0.07] flex items-center justify-between sticky top-0 bg-[#060912]/90 backdrop-blur-2xl z-20">
